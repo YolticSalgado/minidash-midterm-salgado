@@ -4,7 +4,7 @@ import sqlite3
 from datetime import datetime
 
 from minidash import repository
-from minidash.errors import NotFoundError, ValidationFailedError
+from minidash.errors import ConflictError, NotFoundError, ValidationFailedError
 from minidash.scheduling import release_cutoff, to_db, validate_schedule
 from minidash.schemas import OrderIn, OrderStatus
 
@@ -67,8 +67,30 @@ def release_due_orders(conn: sqlite3.Connection, now: datetime) -> list[int]:
         return repository.release_scheduled_orders(conn, to_db(release_cutoff(now)))
 
 
-def update_status(conn: sqlite3.Connection, order_id: int, status: OrderStatus) -> dict:
+def cancel_order(conn: sqlite3.Connection, order_id: int) -> dict:
+    """Customer cancel: allowed only while the order is SCHEDULED (not yet released)."""
     get_order(conn, order_id)  # raises if missing
+    with conn:
+        cancelled = repository.cancel_if_scheduled(conn, order_id)
+    order = get_order(conn, order_id)
+    if not cancelled:
+        raise ConflictError(
+            "ORDER_NOT_CANCELLABLE",
+            f"Only scheduled orders can be cancelled; order {order_id} is {order['status']}.",
+        )
+    return order
+
+
+def update_status(conn: sqlite3.Connection, order_id: int, status: OrderStatus) -> dict:
+    """Restaurant/driver status change. Cannot touch SCHEDULED orders, so release stays the
+    scheduler's job and cancellation goes through cancel_order()."""
+    current = get_order(conn, order_id)  # raises if missing
+    if current["status"] == OrderStatus.SCHEDULED or status == OrderStatus.SCHEDULED:
+        raise ConflictError(
+            "STATUS_CHANGE_NOT_ALLOWED",
+            "Scheduled orders are released automatically or cancelled via"
+            " POST /orders/{id}/cancel; they cannot be set by a status update.",
+        )
     with conn:
         repository.set_status(conn, order_id, status)
     return get_order(conn, order_id)

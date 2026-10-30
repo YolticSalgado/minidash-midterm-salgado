@@ -61,6 +61,19 @@ def set_status(conn: sqlite3.Connection, order_id: int, status: str) -> None:
     conn.execute("UPDATE orders SET status = ? WHERE id = ?", (status, order_id))
 
 
+def cancel_if_scheduled(conn: sqlite3.Connection, order_id: int) -> bool:
+    """Cancel the order only if it is still SCHEDULED. Returns False if it was not.
+
+    Checking and writing in one statement means a cancel can never undo a release that
+    happened a moment earlier.
+    """
+    cur = conn.execute(
+        "UPDATE orders SET status = 'CANCELLED' WHERE id = ? AND status = 'SCHEDULED'",
+        (order_id,),
+    )
+    return cur.rowcount == 1
+
+
 def release_scheduled_orders(conn: sqlite3.Connection, cutoff: str) -> list[int]:
     """Move every SCHEDULED order due by `cutoff` to PLACED in one statement; return their ids.
 

@@ -39,7 +39,7 @@ suite. Test files are named after the slice; test names include the AC they prov
   *Verify:* `test_slice7_worker.py` — the loop calls release, survives an exception, and stops
   when signalled; the app releases a due order on startup with a fixed clock.
 
-- [ ] **Slice 8 — Cancel and status guard** (AC9, AC10, AC11)
+- [x] **Slice 8 — Cancel and status guard** (AC9, AC10, AC11)
   `POST /orders/{id}/cancel`; `PATCH /status` refuses `SCHEDULED` orders and the `SCHEDULED` value.
   *Verify:* `test_slice8_cancel.py` — cancel `SCHEDULED` → `CANCELLED` and never released; cancel
   `PLACED` → 409 unchanged; unknown → 404; PATCH guard → 409.

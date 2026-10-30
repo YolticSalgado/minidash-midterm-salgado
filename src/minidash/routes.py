@@ -50,6 +50,11 @@ def get_order(order_id: int, conn: Conn):
     return services.get_order(conn, order_id)
 
 
+@router.post("/orders/{order_id}/cancel", response_model=OrderOut)
+def cancel_order(order_id: int, conn: Conn):
+    return services.cancel_order(conn, order_id)
+
+
 @router.patch("/orders/{order_id}/status", response_model=OrderOut)
 def update_status(order_id: int, body: StatusUpdate, conn: Conn):
     return services.update_status(conn, order_id, body.status)
