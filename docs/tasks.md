@@ -24,7 +24,7 @@ suite. Test files are named after the slice; test names include the AC they prov
   *Verify:* `test_slice4_opening_hours.py` — table of boundary times for day, overnight, and 24 h
   hours.
 
-- [ ] **Slice 5 — API: place a scheduled order** (AC1–AC6)
+- [x] **Slice 5 — API: place a scheduled order** (AC1–AC6)
   `POST /orders` accepts `scheduled_for`; returns `SCHEDULED` or 422 with the right code.
   *Verify:* `test_slice5_api_schedule.py` — 201 `SCHEDULED`; each 422 code; nothing stored on
   rejection; unscheduled orders still `PLACED`.

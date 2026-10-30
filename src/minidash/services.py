@@ -5,7 +5,7 @@ from datetime import datetime
 
 from minidash import repository
 from minidash.errors import NotFoundError, ValidationFailedError
-from minidash.scheduling import to_db
+from minidash.scheduling import to_db, validate_schedule
 from minidash.schemas import OrderIn, OrderStatus
 
 
@@ -16,7 +16,8 @@ def list_menu(conn: sqlite3.Connection, restaurant_id: int) -> list[sqlite3.Row]
 
 
 def place_order(conn: sqlite3.Connection, order: OrderIn, now: datetime) -> dict:
-    if repository.get_restaurant(conn, order.restaurant_id) is None:
+    restaurant = repository.get_restaurant(conn, order.restaurant_id)
+    if restaurant is None:
         raise NotFoundError(
             "RESTAURANT_NOT_FOUND", f"Restaurant {order.restaurant_id} does not exist."
         )
@@ -31,15 +32,23 @@ def place_order(conn: sqlite3.Connection, order: OrderIn, now: datetime) -> dict
             )
         lines.append((item.menu_item_id, item.quantity, prices[item.menu_item_id]))
 
+    if order.scheduled_for is None:
+        status, scheduled_for = OrderStatus.PLACED, None
+    else:
+        when = validate_schedule(
+            order.scheduled_for, now, restaurant["opens_at"], restaurant["closes_at"]
+        )
+        status, scheduled_for = OrderStatus.SCHEDULED, to_db(when)
+
     with conn:
         order_id = repository.insert_order(
             conn,
             restaurant_id=order.restaurant_id,
-            status=OrderStatus.PLACED,
+            status=status,
             total_cents=sum(qty * price for _, qty, price in lines),
             address=order.address,
             created_at=to_db(now),
-            scheduled_for=None,
+            scheduled_for=scheduled_for,
             items=lines,
         )
     return get_order(conn, order_id)
