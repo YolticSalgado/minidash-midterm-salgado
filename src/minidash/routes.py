@@ -7,6 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request
 
 from minidash import repository, services
+from minidash.clock import Clock
 from minidash.db import connect
 from minidash.schemas import MenuItemOut, OrderIn, OrderOut, RestaurantOut, StatusUpdate
 
@@ -21,7 +22,12 @@ def get_conn(request: Request) -> Iterator[sqlite3.Connection]:
         conn.close()
 
 
+def get_clock(request: Request) -> Clock:
+    return request.app.state.clock
+
+
 Conn = Annotated[sqlite3.Connection, Depends(get_conn)]
+AppClock = Annotated[Clock, Depends(get_clock)]
 
 
 @router.get("/restaurants", response_model=list[RestaurantOut])
@@ -35,13 +41,18 @@ def get_menu(restaurant_id: int, conn: Conn):
 
 
 @router.post("/orders", status_code=201, response_model=OrderOut)
-def place_order(order: OrderIn, conn: Conn):
-    return services.place_order(conn, order)
+def place_order(order: OrderIn, conn: Conn, clock: AppClock):
+    return services.place_order(conn, order, now=clock.now())
 
 
 @router.get("/orders/{order_id}", response_model=OrderOut)
 def get_order(order_id: int, conn: Conn):
     return services.get_order(conn, order_id)
+
+
+@router.post("/orders/{order_id}/cancel", response_model=OrderOut)
+def cancel_order(order_id: int, conn: Conn):
+    return services.cancel_order(conn, order_id)
 
 
 @router.patch("/orders/{order_id}/status", response_model=OrderOut)

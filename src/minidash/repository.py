@@ -26,13 +26,14 @@ def insert_order(
     total_cents: int,
     address: str,
     created_at: str,
+    scheduled_for: str | None,
     items: list[tuple[int, int, int]],
 ) -> int:
     """Insert an order and its items. `items` holds (menu_item_id, quantity, price_cents)."""
     cur = conn.execute(
-        "INSERT INTO orders (restaurant_id, status, total_cents, address, created_at)"
-        " VALUES (?, ?, ?, ?, ?)",
-        (restaurant_id, status, total_cents, address, created_at),
+        "INSERT INTO orders (restaurant_id, status, total_cents, address, created_at,"
+        " scheduled_for) VALUES (?, ?, ?, ?, ?, ?)",
+        (restaurant_id, status, total_cents, address, created_at, scheduled_for),
     )
     order_id = cur.lastrowid
     conn.executemany(
@@ -58,3 +59,29 @@ def get_order_items(conn: sqlite3.Connection, order_id: int) -> list[sqlite3.Row
 
 def set_status(conn: sqlite3.Connection, order_id: int, status: str) -> None:
     conn.execute("UPDATE orders SET status = ? WHERE id = ?", (status, order_id))
+
+
+def cancel_if_scheduled(conn: sqlite3.Connection, order_id: int) -> bool:
+    """Cancel the order only if it is still SCHEDULED. Returns False if it was not.
+
+    Checking and writing in one statement means a cancel can never undo a release that
+    happened a moment earlier.
+    """
+    cur = conn.execute(
+        "UPDATE orders SET status = 'CANCELLED' WHERE id = ? AND status = 'SCHEDULED'",
+        (order_id,),
+    )
+    return cur.rowcount == 1
+
+
+def release_scheduled_orders(conn: sqlite3.Connection, cutoff: str) -> list[int]:
+    """Move every SCHEDULED order due by `cutoff` to PLACED in one statement; return their ids.
+
+    The status filter makes this exactly-once: a released order no longer matches.
+    """
+    rows = conn.execute(
+        "UPDATE orders SET status = 'PLACED'"
+        " WHERE status = 'SCHEDULED' AND scheduled_for <= ? RETURNING id",
+        (cutoff,),
+    ).fetchall()
+    return sorted(row["id"] for row in rows)
