@@ -19,7 +19,7 @@ suite. Test files are named after the slice; test names include the AC they prov
   *Verify:* `test_slice3_lead_time.py` — 44:59 / 45:00 / 46:00 minutes; 7 days and 7 days + 1 s;
   naive time rejected; non-UTC offset converted to UTC.
 
-- [ ] **Slice 4 — Opening-hours rule** (AC6)
+- [x] **Slice 4 — Opening-hours rule** (AC6)
   `is_open_at()` with `[open, close)`, overnight wrap, and 24-hour restaurants.
   *Verify:* `test_slice4_opening_hours.py` — table of boundary times for day, overnight, and 24 h
   hours.

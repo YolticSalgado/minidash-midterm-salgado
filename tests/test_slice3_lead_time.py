@@ -6,11 +6,12 @@ from minidash.errors import ValidationFailedError
 from minidash.scheduling import validate_schedule
 
 NOW = datetime(2026, 11, 2, 12, 0, tzinfo=UTC)
+ALWAYS_OPEN = ("00:00", "00:00")  # keep opening hours out of these lead-time tests
 
 
 def error_code(scheduled_for):
     with pytest.raises(ValidationFailedError) as exc:
-        validate_schedule(scheduled_for, NOW)
+        validate_schedule(scheduled_for, NOW, *ALWAYS_OPEN)
     return exc.value.code
 
 
@@ -37,7 +38,7 @@ def test_ac3_less_than_45_minutes_is_too_soon(lead):
     ],
 )
 def test_ac2_lead_between_45_minutes_and_7_days_is_accepted(lead):
-    assert validate_schedule(NOW + lead, NOW) == NOW + lead
+    assert validate_schedule(NOW + lead, NOW, *ALWAYS_OPEN) == NOW + lead
 
 
 @pytest.mark.parametrize("lead", [timedelta(days=7, seconds=1), timedelta(days=8)])
@@ -51,6 +52,6 @@ def test_ac5_naive_time_is_rejected():
 
 def test_other_offset_is_returned_as_utc():
     new_york = timezone(timedelta(hours=-5))
-    result = validate_schedule(datetime(2026, 11, 2, 13, 0, tzinfo=new_york), NOW)
+    result = validate_schedule(datetime(2026, 11, 2, 13, 0, tzinfo=new_york), NOW, *ALWAYS_OPEN)
     assert result == datetime(2026, 11, 2, 18, 0, tzinfo=UTC)
     assert result.utcoffset() == timedelta(0)
