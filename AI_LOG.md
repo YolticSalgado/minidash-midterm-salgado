@@ -152,15 +152,3 @@ modified before acceptance.
 | What I changed and why | Nothing. |
 | Outcome | Accepted. |
 
-### Entry 12
-
-| Field | Entry |
-|---|---|
-| Entry # / date | 12 / Oct 30 |
-| Tool, model, mode | Claude Code, Opus 5.5, chat |
-| Slice | Reflection (written deliverable, not code) |
-| Prompt (summarized) | Gave it my own reflection draft and asked for feedback, then for a revised sample that adds the missing Prompt 3 paragraph. |
-| What the AI produced | Feedback on my draft (Prompt 3 missing, over 2 pages, several sentences inaccurate about who did what), then a revised version: tighter wording, accuracy fixes, and a drafted Prompt 3 paragraph built from facts in this log and the commit history. |
-| What I verified | Checked each fact in the revision against this log and the commits. |
-| What I changed and why | My own draft supplied the structure and content for prompts 1, 2, 4, and 5. The AI drafted the Prompt 3 paragraph and revised the wording of the rest; the final version is my edit of that. |
-| Outcome | Used as the basis for the submitted reflection PDF. |
