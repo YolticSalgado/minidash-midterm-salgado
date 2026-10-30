@@ -14,7 +14,7 @@ suite. Test files are named after the slice; test names include the AC they prov
   *Verify:* `test_slice2_migration.py` — an old-schema DB with an existing order gains the column,
   the old order reads back with `scheduled_for = NULL`, and migrating twice is safe.
 
-- [ ] **Slice 3 — Lead-time rule** (AC3, AC4, AC5)
+- [x] **Slice 3 — Lead-time rule** (AC3, AC4, AC5)
   `validate_schedule()` lead-time and time-zone checks.
   *Verify:* `test_slice3_lead_time.py` — 44:59 / 45:00 / 46:00 minutes; 7 days and 7 days + 1 s;
   naive time rejected; non-UTC offset converted to UTC.
