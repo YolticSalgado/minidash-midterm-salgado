@@ -59,3 +59,16 @@ def get_order_items(conn: sqlite3.Connection, order_id: int) -> list[sqlite3.Row
 
 def set_status(conn: sqlite3.Connection, order_id: int, status: str) -> None:
     conn.execute("UPDATE orders SET status = ? WHERE id = ?", (status, order_id))
+
+
+def release_scheduled_orders(conn: sqlite3.Connection, cutoff: str) -> list[int]:
+    """Move every SCHEDULED order due by `cutoff` to PLACED in one statement; return their ids.
+
+    The status filter makes this exactly-once: a released order no longer matches.
+    """
+    rows = conn.execute(
+        "UPDATE orders SET status = 'PLACED'"
+        " WHERE status = 'SCHEDULED' AND scheduled_for <= ? RETURNING id",
+        (cutoff,),
+    ).fetchall()
+    return sorted(row["id"] for row in rows)

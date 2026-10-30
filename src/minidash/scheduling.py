@@ -6,6 +6,7 @@ from minidash.errors import ValidationFailedError
 
 MIN_LEAD = timedelta(minutes=45)
 MAX_LEAD = timedelta(days=7)
+RELEASE_BEFORE = timedelta(minutes=30)
 
 
 def to_db(dt: datetime) -> str:
@@ -13,6 +14,11 @@ def to_db(dt: datetime) -> str:
     if dt.tzinfo is None or dt.utcoffset() is None:
         raise ValueError("to_db() needs a timezone-aware datetime")
     return dt.astimezone(UTC).isoformat(timespec="microseconds")
+
+
+def release_cutoff(now: datetime) -> datetime:
+    """Orders scheduled at or before this time are due for the kitchen."""
+    return now + RELEASE_BEFORE
 
 
 def is_open_at(opens_at: str, closes_at: str, t: time) -> bool:

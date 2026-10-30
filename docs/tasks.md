@@ -29,7 +29,7 @@ suite. Test files are named after the slice; test names include the AC they prov
   *Verify:* `test_slice5_api_schedule.py` — 201 `SCHEDULED`; each 422 code; nothing stored on
   rejection; unscheduled orders still `PLACED`.
 
-- [ ] **Slice 6 — Release due orders exactly once** (AC7, AC8)
+- [x] **Slice 6 — Release due orders exactly once** (AC7, AC8)
   `release_due_orders(conn, now)` with one atomic `UPDATE`.
   *Verify:* `test_slice6_release.py` — 30 min 1 s before: not released; exactly 30 min before:
   released; second run releases nothing; only due orders move.

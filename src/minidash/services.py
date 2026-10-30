@@ -5,7 +5,7 @@ from datetime import datetime
 
 from minidash import repository
 from minidash.errors import NotFoundError, ValidationFailedError
-from minidash.scheduling import to_db, validate_schedule
+from minidash.scheduling import release_cutoff, to_db, validate_schedule
 from minidash.schemas import OrderIn, OrderStatus
 
 
@@ -59,6 +59,12 @@ def get_order(conn: sqlite3.Connection, order_id: int) -> dict:
     if row is None:
         raise NotFoundError("ORDER_NOT_FOUND", f"Order {order_id} does not exist.")
     return {**dict(row), "items": [dict(r) for r in repository.get_order_items(conn, order_id)]}
+
+
+def release_due_orders(conn: sqlite3.Connection, now: datetime) -> list[int]:
+    """Send every SCHEDULED order due within 30 minutes to the kitchen (status PLACED)."""
+    with conn:
+        return repository.release_scheduled_orders(conn, to_db(release_cutoff(now)))
 
 
 def update_status(conn: sqlite3.Connection, order_id: int, status: OrderStatus) -> dict:
