@@ -34,7 +34,7 @@ suite. Test files are named after the slice; test names include the AC they prov
   *Verify:* `test_slice6_release.py` — 30 min 1 s before: not released; exactly 30 min before:
   released; second run releases nothing; only due orders move.
 
-- [ ] **Slice 7 — Background release loop** (AC7)
+- [x] **Slice 7 — Background release loop** (AC7)
   `run_release_loop()` in `worker.py`, started and stopped by the FastAPI lifespan.
   *Verify:* `test_slice7_worker.py` — the loop calls release, survives an exception, and stops
   when signalled; the app releases a due order on startup with a fixed clock.
