@@ -39,6 +39,7 @@ def place_order(conn: sqlite3.Connection, order: OrderIn, now: datetime) -> dict
             total_cents=sum(qty * price for _, qty, price in lines),
             address=order.address,
             created_at=to_db(now),
+            scheduled_for=None,
             items=lines,
         )
     return get_order(conn, order_id)

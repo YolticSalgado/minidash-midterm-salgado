@@ -65,10 +65,19 @@ def connect(db_path: str | Path) -> sqlite3.Connection:
     return conn
 
 
+def migrate(conn: sqlite3.Connection) -> None:
+    """Bring an existing database up to the current schema. Safe to run repeatedly."""
+    columns = {row["name"] for row in conn.execute("PRAGMA table_info(orders)")}
+    if "scheduled_for" not in columns:
+        # NULL = deliver as soon as possible, which is what every pre-existing order meant.
+        conn.execute("ALTER TABLE orders ADD COLUMN scheduled_for TEXT")
+
+
 def init_db(db_path: str | Path) -> None:
-    """Create tables and seed restaurants/menus if the database is empty."""
+    """Create tables, apply migrations, and seed restaurants/menus if the database is empty."""
     with closing(connect(db_path)) as conn, conn:
         conn.executescript(SCHEMA)
+        migrate(conn)
         if conn.execute("SELECT COUNT(*) FROM restaurants").fetchone()[0] == 0:
             conn.executemany("INSERT INTO restaurants VALUES (?, ?, ?, ?, ?, ?)", RESTAURANTS)
             conn.executemany("INSERT INTO menu_items VALUES (?, ?, ?, ?)", MENU_ITEMS)

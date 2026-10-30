@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class OrderStatus(StrEnum):
+    SCHEDULED = "SCHEDULED"
     PLACED = "PLACED"
     PREPARING = "PREPARING"
     READY = "READY"
@@ -54,6 +55,7 @@ class OrderOut(BaseModel):
     total_cents: int
     address: str
     created_at: str
+    scheduled_for: str | None
     items: list[OrderItemOut]
 
 

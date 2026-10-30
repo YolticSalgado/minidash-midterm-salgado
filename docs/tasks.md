@@ -9,7 +9,7 @@ suite. Test files are named after the slice; test names include the AC they prov
   *Verify:* `test_slice1_clock.py` — `created_at` equals the fixed clock's time; `to_db()` always
   produces the same fixed-width UTC format, including from a non-UTC offset.
 
-- [ ] **Slice 2 — Data model and migration** (AC1, AC2)
+- [x] **Slice 2 — Data model and migration** (AC1, AC2)
   `orders.scheduled_for TEXT NULL`, `SCHEDULED` status, idempotent `migrate()`.
   *Verify:* `test_slice2_migration.py` — an old-schema DB with an existing order gains the column,
   the old order reads back with `scheduled_for = NULL`, and migrating twice is safe.
