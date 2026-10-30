@@ -1,0 +1,17 @@
+[project]
+name = "minidash"
+version = "0.1.0"
+description = "MiniDash food-delivery REST API (CSCI-665 assignment)"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
