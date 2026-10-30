@@ -1,10 +1,11 @@
 """Ordering business logic. Routes call these; these call the repository."""
 
 import sqlite3
-from datetime import UTC, datetime
+from datetime import datetime
 
 from minidash import repository
 from minidash.errors import NotFoundError, ValidationFailedError
+from minidash.scheduling import to_db
 from minidash.schemas import OrderIn, OrderStatus
 
 
@@ -14,7 +15,7 @@ def list_menu(conn: sqlite3.Connection, restaurant_id: int) -> list[sqlite3.Row]
     return repository.list_menu(conn, restaurant_id)
 
 
-def place_order(conn: sqlite3.Connection, order: OrderIn) -> dict:
+def place_order(conn: sqlite3.Connection, order: OrderIn, now: datetime) -> dict:
     if repository.get_restaurant(conn, order.restaurant_id) is None:
         raise NotFoundError(
             "RESTAURANT_NOT_FOUND", f"Restaurant {order.restaurant_id} does not exist."
@@ -37,7 +38,7 @@ def place_order(conn: sqlite3.Connection, order: OrderIn) -> dict:
             status=OrderStatus.PLACED,
             total_cents=sum(qty * price for _, qty, price in lines),
             address=order.address,
-            created_at=datetime.now(UTC).isoformat(),
+            created_at=to_db(now),
             items=lines,
         )
     return get_order(conn, order_id)

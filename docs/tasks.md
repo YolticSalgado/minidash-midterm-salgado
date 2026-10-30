@@ -3,7 +3,7 @@
 Each slice is small enough to review in a few minutes and is merged on its own with a passing
 suite. Test files are named after the slice; test names include the AC they prove.
 
-- [ ] **Slice 1 — Inject a clock** (AC12)
+- [x] **Slice 1 — Inject a clock** (AC12)
   Add `Clock` / `SystemClock`; `create_app(clock=...)`; `place_order` takes `now` instead of
   calling `datetime.now()`; add `to_db()` for UTC timestamps.
   *Verify:* `test_slice1_clock.py` — `created_at` equals the fixed clock's time; `to_db()` always

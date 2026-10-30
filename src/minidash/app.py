@@ -5,17 +5,19 @@ import os
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from minidash.clock import Clock, SystemClock
 from minidash.db import init_db
 from minidash.errors import DomainError
 from minidash.routes import router
 
 
-def create_app(db_path: str | None = None) -> FastAPI:
+def create_app(db_path: str | None = None, clock: Clock | None = None) -> FastAPI:
     db_path = db_path or os.environ.get("MINIDASH_DB", "minidash.db")
     init_db(db_path)
 
     app = FastAPI(title="MiniDash")
     app.state.db_path = db_path
+    app.state.clock = clock or SystemClock()
     app.include_router(router)
 
     @app.exception_handler(DomainError)
